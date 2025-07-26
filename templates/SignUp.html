@@ -1,0 +1,36 @@
+{% extends "base.html" %} {% block content %}
+
+  <p class="display-6">Create Account</p>
+  <form method="POST" action="{{url_for('signup')}}" id="signupForm">
+    {{form.hidden_tag()}}
+    <div class="mb-3">
+      <label for="email" class="form-label">Email address</label>
+      {{ form.email(class="form-control", id="email",type="email") }}
+    </div>
+    <div class="mb-3">
+      <label for="password" class="form-label">Password</label>
+      {{ form.password(class="form-control", id="password", type="password") }}
+    </div>
+    <div class="mb-3">
+      {{form.address.label(class="form-label")}} {{
+      form.address(class="form-control", id="address", type="address") }}
+    </div>
+    <div class="mb-3">
+      {{form.fullname.label(class="form-label")}} {{
+      form.fullname(class="form-control", id="fullname", type="text") }}
+    </div>
+    <div class="mb-3">
+      {{form.pincode.label(class="form-label")}} {{
+      form.pincode(class="form-control", id="pincode", type="text") }}
+    </div>
+    <div class="mb-3">
+      {{form.phone.label(class="form-label")}} {{
+      form.phone(class="form-control", id="phone", type="text") }}
+    </div>
+    <button type="submit" class="btn btn-primary">Sign Up</button>
+  </form>
+  <a href="{{ url_for('home') }}" class="text-info"
+    >Already have an account? Login</a
+  >
+</div>
+{% endblock %}

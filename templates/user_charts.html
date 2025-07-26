@@ -1,0 +1,80 @@
+{% extends "base.html" %} {% block content %}
+
+<div class="container-fluid">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container">
+      <span class="navbar-brand">My Parking Analytics</span>
+      <div class="navbar-nav me-auto">
+        <div class="d-flex align-items-center"></div>
+      </div>
+
+      <div class="navbar-nav">
+        <a class="nav-link" href="{{ url_for('user_dashboard') }}">
+          <i class="bi bi-house"></i> Dashboard
+        </a>
+        <a class="nav-link" href="{{ url_for('logout') }}">
+          <i class="bi bi-box-arrow-right"></i> Logout
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="row mb-4">
+    <div class="col-md-3 mb-3">
+      <div class="card bg-primary text-white">
+        <div class="card-body text-center">
+          <h3>{{ user_stats.total_bookings if user_stats else 0 }}</h3>
+          <p>Total Bookings</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card bg-success text-white">
+        <div class="card-body text-center">
+          <h3>{{ user_stats.completed_bookings if user_stats else 0 }}</h3>
+          <p>Completed</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card bg-warning text-dark">
+        <div class="card-body text-center">
+          <h3>{{ user_stats.cancelled_bookings if user_stats else 0 }}</h3>
+          <p>Cancelled</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card bg-info text-white">
+        <div class="card-body text-center">
+          <h3>
+            ₹{{ user_stats.total_spent|round(2) if user_stats.total_spent else 0
+            }}
+          </h3>
+          <p>Total Spent</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .card {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+  }
+
+  .badge {
+    font-size: 0.9em;
+  }
+
+  .navbar-brand {
+    font-weight: bold;
+  }
+</style>
+
+{% endblock %}

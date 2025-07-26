@@ -1,0 +1,161 @@
+{% extends "base.html" %} {% block content %}
+
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Booking Reports & Analytics</h2>
+    <div>
+      <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary me-2"
+        >Back to Dashboard</a
+      >
+      <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+    </div>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-md-3 mb-3">
+      <div class="card bg-primary text-white">
+        <div class="card-body text-center">
+          <h3>{{ stats.total_bookings }}</h3>
+          <p>Total Bookings</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card bg-warning text-dark">
+        <div class="card-body text-center">
+          <h3>{{ stats.active_bookings }}</h3>
+          <p>Active Bookings</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card bg-success text-white">
+        <div class="card-body text-center">
+          <h3>₹{{ "%.2f"|format(stats.total_revenue) }}</h3>
+          <p>Total Revenue</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card bg-info text-white">
+        <div class="card-body text-center">
+          <h3>{{ stats.total_users }}</h3>
+          <p>Registered Users</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Additional Stats -->
+  <div class="row mb-4">
+    <div class="col-md-3 mb-3">
+      <div class="card bg-secondary text-white">
+        <div class="card-body text-center">
+          <h3>{{ stats.completed_bookings }}</h3>
+          <p>Completed</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card bg-danger text-white">
+        <div class="card-body text-center">
+          <h3>{{ stats.cancelled_bookings }}</h3>
+          <p>Cancelled</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card bg-dark text-white">
+        <div class="card-body text-center">
+          <h3>{{ stats.total_lots }}</h3>
+          <p>Parking Lots</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card bg-light text-dark">
+        <div class="card-body text-center">
+          <h3>{{ stats.total_spots }}</h3>
+          <p>Total Spots</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5>Recent Bookings</h5>
+        </div>
+        <div class="card-body p-0">
+          {% if bookings %}
+          <div class="table-responsive">
+            <table class="table table-striped table-hover mb-0">
+              <thead class="table-dark">
+                <tr>
+                  <th>ID</th>
+                  <th>User</th>
+                  <th>Vehicle</th>
+                  <th>Location</th>
+                  <th>Spot</th>
+                  <th>Booking Time</th>
+                  <th>Release Time</th>
+                  <th>Duration</th>
+                  <th>Status</th>
+                  <th>Cost</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for booking in bookings %}
+                <tr>
+                  <td>{{ booking.id }}</td>
+                  <td>
+                    <strong>{{ booking.user_name }}</strong><br />
+                    <small class="text-muted">{{ booking.user_email }}</small>
+                  </td>
+                  <td>{{ booking.vehicle_number }}</td>
+                  <td>{{ booking.lot_name }}</td>
+                  <td>{{ booking.spot_number }}</td>
+                  <td>{{ booking.booking_time }}</td>
+                  <td>{{ booking.release_time }}</td>
+                  <td>{{ booking.duration }}</td>
+                  <td>
+                    {% if booking.status == 'active' %}
+                    <span class="badge bg-warning">Active</span>
+                    {% elif booking.status == 'completed' %}
+                    <span class="badge bg-success">Completed</span>
+                    {% elif booking.status == 'cancelled' %}
+                    <span class="badge bg-danger">Cancelled</span>
+                    {% endif %}
+                  </td>
+                  <td>₹{{ "%.2f"|format(booking.cost) }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="alert alert-warning m-3">
+            <h5>No Bookings Found</h5>
+            <p>No booking records are available in the system.</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-12 text-center">
+      <a href="{{ url_for('admin_users') }}" class="btn btn-info me-2"
+        >View Users</a
+      >
+      <a href="{{ url_for('admin_dashboard') }}" class="btn btn-primary me-2"
+        >Manage Parking</a
+      >
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,241 @@
+{% extends "base.html" %} {% block content %}
+
+<div class="container-fluid">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container">
+      <span class="navbar-brand">Welcome {{ email }}!</span>
+      <div class="navbar-nav">
+        <a class="nav-link" href="{{ url_for('user_charts') }}">
+          <i class="bi bi-bar-chart"></i> My Charts
+        </a>
+        <a class="nav-link" href="{{ url_for('logout') }}">
+          <i class="bi bi-box-arrow-right"></i> Logout
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  {% if current_booking %}
+  <div class="alert alert-warning">
+    <h5>Active Booking</h5>
+    <p>
+      <strong>Spot:</strong> {{ current_booking.spot_id }} |
+      <strong>Lot:</strong> {{ current_booking.lot_id }} |
+      <strong>Vehicle:</strong> {{ current_booking.vehicle_number }} |
+      <strong>Time:</strong> {{ current_booking.booking_time }}
+    </p>
+  </div>
+  {% endif %}
+
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <h4>Recent Parking History</h4>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Location</th>
+            <th>Date</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if booking_history %} {% for booking in booking_history %}
+          <tr>
+            <td>{{ booking.id }}</td>
+            <td>{{ booking.location }}</td>
+            <td>{{ booking.date }}</td>
+            <td>
+              {% if booking.status == 'completed' %}
+              <span class="badge bg-success">Completed</span>
+              {% elif booking.status == 'cancelled' %}
+              <span class="badge bg-danger">Cancelled</span>
+              {% else %}
+              <span class="badge bg-warning">{{ booking.status|title }}</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %} {% else %}
+          <tr>
+            <td colspan="4" class="text-muted text-center">
+              No booking history found
+            </td>
+          </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="col-md-6">
+      <h4>Release Parking Spot</h4>
+      {% if current_booking %}
+      <form method="POST" action="{{ url_for('release_parking') }}">
+        {{ release_form.hidden_tag() }}
+        <div class="mb-3">
+          {{ release_form.spot_display.label(class="form-label") }} {{
+          release_form.spot_display(class="form-control", readonly=true) }}
+        </div>
+        <div class="mb-3">
+          {{ release_form.vehicle_display.label(class="form-label") }} {{
+          release_form.vehicle_display(class="form-control", readonly=true) }}
+        </div>
+        <div class="mb-3">
+          {{ release_form.cost_display.label(class="form-label") }} {{
+          release_form.cost_display(class="form-control", readonly=true) }}
+        </div>
+        {{ release_form.submit(class="btn btn-primary") }}
+      </form>
+      {% else %}
+      <p class="text-muted">No active booking to release.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <h4>Search Parking Lots</h4>
+      <form method="GET" action="{{ url_for('user_dashboard') }}">
+        {{ search_form.hidden_tag() }}
+        <div class="input-group mb-3">
+          {{ search_form.location(class="form-control", placeholder="Search by
+          location", value=search_location) }}
+          <button class="btn btn-outline-primary" type="submit">Search</button>
+        </div>
+      </form>
+
+      <h5>Available Parking Lots</h5>
+      <div class="list-group">
+        {% if parking_lots %} {% for lot in parking_lots %}
+        <div class="list-group-item">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <h6>{{ lot.name }}</h6>
+              <small
+                >Location: {{ lot.location }} | Available: {{ lot.available }}
+                spots</small
+              >
+            </div>
+            <div class="text-end">
+              <small class="text-muted">₹{{ lot.price_per_hour }}/hour</small>
+            </div>
+          </div>
+        </div>
+        {% endfor %} {% else %}
+        <div class="list-group-item">
+          <p class="text-muted">
+            {% if search_location %} No parking lots found for "{{
+            search_location }}" {% else %} No parking lots available {% endif %}
+          </p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <h4>Book Parking Spot</h4>
+      {% if not current_booking %}
+
+      <div class="card mb-3">
+        <div class="card-header">
+          <h6>Step 1: Select Parking Lot</h6>
+        </div>
+        <div class="card-body">
+          <form method="POST" action="{{ url_for('user_dashboard') }}">
+            {{ lot_selection_form.hidden_tag() }}
+            <div class="mb-3">
+              {{ lot_selection_form.lot_id.label(class="form-label") }} {{
+              lot_selection_form.lot_id(class="form-control") }} {% if
+              lot_selection_form.lot_id.errors %}
+              <div class="text-danger">
+                {% for error in lot_selection_form.lot_id.errors %}
+                <small>{{ error }}</small>
+                {% endfor %}
+              </div>
+              {% endif %}
+            </div>
+            {{ lot_selection_form.submit(class="btn btn-primary") }}
+          </form>
+        </div>
+      </div>
+
+      {% if selected_lot %}
+      <div class="card">
+        <div class="card-header">
+          <h6>Step 2: Book Your Spot</h6>
+          <small class="text-muted"
+            >{{ selected_lot.name }} - {{ selected_lot.location }}</small
+          >
+        </div>
+        <div class="card-body">
+          <form method="POST" action="{{ url_for('user_dashboard') }}">
+            {{ booking_form.hidden_tag() }} {{
+            booking_form.lot_id(type="hidden") }}
+
+            <div class="mb-3">
+              {{ booking_form.spot_id.label(class="form-label") }} {{
+              booking_form.spot_id(class="form-control") }} {% if
+              booking_form.spot_id.errors %}
+              <div class="text-danger">
+                {% for error in booking_form.spot_id.errors %}
+                <small>{{ error }}</small>
+                {% endfor %}
+              </div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              {{ booking_form.vehicle_number.label(class="form-label") }} {{
+              booking_form.vehicle_number(class="form-control",
+              placeholder="Enter vehicle number") }} {% if
+              booking_form.vehicle_number.errors %}
+              <div class="text-danger">
+                {% for error in booking_form.vehicle_number.errors %}
+                <small>{{ error }}</small>
+                {% endfor %}
+              </div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Price per Hour</label>
+              <input
+                type="text"
+                class="form-control"
+                value="₹{{ selected_lot.price_per_hour }}"
+                readonly
+              />
+            </div>
+
+            {{ booking_form.submit(class="btn btn-success") }}
+          </form>
+        </div>
+      </div>
+      {% endif %} {% else %}
+      <p class="text-muted">
+        You already have an active booking. Please release it first.
+      </p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row mt-4 text-center">
+    <div class="col-md-6">
+      <div class="card bg-primary text-white">
+        <div class="card-body">
+          <h3>{% if current_booking %}1{% else %}0{% endif %}</h3>
+          <p>Active Booking</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card bg-success text-white">
+        <div class="card-body">
+          <h3>{{ booking_history|length }}</h3>
+          <p>Completed Bookings</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

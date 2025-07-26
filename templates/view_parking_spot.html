@@ -1,0 +1,288 @@
+{% extends "base.html" %} {% block content %}
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Parking Spot Details</h2>
+    <div>
+      <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary me-2"
+        >Back to Dashboard</a
+      >
+      <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h5>Spot Information</h5>
+        </div>
+        <div class="card-body">
+          <table class="table table-borderless">
+            <tr>
+              <td><strong>Spot ID:</strong></td>
+              <td>{{ spot.id }}</td>
+            </tr>
+            <tr>
+              <td><strong>Spot Number:</strong></td>
+              <td>{{ spot.spot_number }}</td>
+            </tr>
+            <tr>
+              <td><strong>Parking Lot:</strong></td>
+              <td>{{ spot.lot_name }}</td>
+            </tr>
+            <tr>
+              <td><strong>Location:</strong></td>
+              <td>{{ spot.lot_location }}</td>
+            </tr>
+            <tr>
+              <td><strong>Price per Hour:</strong></td>
+              <td>₹{{ spot.price_per_hour }}</td>
+            </tr>
+            <tr>
+              <td><strong>Status:</strong></td>
+              <td>
+                {% if spot.is_occupied %}
+                <span class="badge bg-danger">Occupied</span>
+                {% else %}
+                <span class="badge bg-success">Available</span>
+                {% endif %}
+              </td>
+            </tr>
+          </table>
+
+          <div class="mt-3">
+            {% if spot.is_occupied %}
+            <form
+              method="POST"
+              action="{{ url_for('release_spot', spot_id=spot.id) }}"
+              style="display: inline"
+            >
+              {{ release_spot_form.hidden_tag() }} {{
+              release_spot_form.spot_id(value=spot.id, type="hidden") }} {{
+              release_spot_form.submit(class="btn btn-warning btn-sm",
+              onclick="return confirm('Release this parking spot?')") }}
+            </form>
+            {% endif %}
+
+            <button 
+              class="btn btn-info btn-sm" 
+              data-bs-toggle="modal" 
+              data-bs-target="#editSpotModal"
+            >
+              Edit Spot Name
+            </button>
+
+            <button 
+              class="btn btn-secondary btn-sm" 
+              data-bs-toggle="modal" 
+              data-bs-target="#changeStatusModal"
+            >
+              Change Status
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal fade" id="editSpotModal" tabindex="-1" aria-labelledby="editSpotModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="editSpotModalLabel">Edit Spot Name</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ url_for('edit_spot_name', spot_id=spot.id) }}">
+              <div class="modal-body">
+                {{ edit_spot_form.hidden_tag() }}
+                <div class="mb-3">
+                  {{ edit_spot_form.spot_number.label(class="form-label") }}
+                  {{ edit_spot_form.spot_number(class="form-control", placeholder="Enter new spot name/number") }}
+                  {% if edit_spot_form.spot_number.errors %}
+                    <div class="text-danger">
+                      {% for error in edit_spot_form.spot_number.errors %}
+                        <small>{{ error }}</small>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                  <small class="form-text text-muted">
+                    Current name: <strong>{{ spot.spot_number }}</strong>
+                  </small>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                {{ edit_spot_form.submit(class="btn btn-primary") }}
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal fade" id="changeStatusModal" tabindex="-1" aria-labelledby="changeStatusModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="changeStatusModalLabel">Change Spot Status</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ url_for('change_spot_status', spot_id=spot.id) }}">
+              <div class="modal-body">
+                {{ status_form.hidden_tag() }}
+                <div class="mb-3">
+                  <label class="form-label">Current Status</label>
+                  <div class="alert {% if spot.is_occupied %}alert-danger{% else %}alert-success{% endif %}">
+                    <strong>{{ "Occupied" if spot.is_occupied else "Available" }}</strong>
+                    {% if spot.is_occupied and spot.current_booking %}
+                      <br><small>Occupied by: {{ spot.current_booking.user.fullname }} ({{ spot.current_booking.vehicle_number }})</small>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <div class="form-check">
+                    {{ status_form.is_occupied(class="form-check-input") }}
+                    {{ status_form.is_occupied.label(class="form-check-label") }}
+                  </div>
+                  <small class="form-text text-muted">
+                    Check to mark as occupied, uncheck to mark as available.
+                    {% if spot.is_occupied %}
+                      <br><strong>Warning:</strong> Unchecking will cancel any active booking.
+                    {% endif %}
+                  </small>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                {{ status_form.submit(class="btn btn-warning") }}
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      {% if spot.current_booking %}
+      <div class="card">
+        <div class="card-header">
+          <h5>Current Booking</h5>
+        </div>
+        <div class="card-body">
+          <table class="table table-borderless">
+            <tr>
+              <td><strong>User:</strong></td>
+              <td>{{ spot.current_booking.user.fullname }}</td>
+            </tr>
+            <tr>
+              <td><strong>Email:</strong></td>
+              <td>{{ spot.current_booking.user.email }}</td>
+            </tr>
+            <tr>
+              <td><strong>Vehicle:</strong></td>
+              <td>{{ spot.current_booking.vehicle_number }}</td>
+            </tr>
+            <tr>
+              <td><strong>Booking Time:</strong></td>
+              <td>
+                {{ spot.current_booking.booking_time.strftime('%Y-%m-%d %H:%M')
+                }}
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Duration:</strong></td>
+              <td>Ongoing booking</td>
+            </tr>
+            <tr>
+              <td><strong>Base Cost:</strong></td>
+              <td>
+                ₹{{ "%.2f"|format(spot.current_booking.total_cost) }}/hour
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+      {% else %}
+      <div class="card">
+        <div class="card-header">
+          <h5>Current Status</h5>
+        </div>
+        <div class="card-body">
+          <div class="alert alert-success">
+            <h6>Spot Available</h6>
+            <p class="mb-0">
+              This parking spot is currently available for booking.
+            </p>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5>Recent Booking History (Last 10)</h5>
+        </div>
+        <div class="card-body">
+          {% if spot.booking_history %}
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Booking ID</th>
+                  <th>User</th>
+                  <th>Vehicle</th>
+                  <th>Booking Time</th>
+                  <th>Release Time</th>
+                  <th>Duration</th>
+                  <th>Status</th>
+                  <th>Cost</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for booking in spot.booking_history %}
+                <tr>
+                  <td>#{{ booking.id }}</td>
+                  <td>{{ booking.user.fullname }}</td>
+                  <td>{{ booking.vehicle_number }}</td>
+                  <td>{{ booking.booking_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                  <td>
+                    {% if booking.release_time %} {{
+                    booking.release_time.strftime('%Y-%m-%d %H:%M') }} {% else
+                    %}
+                    <span class="text-warning">Ongoing</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if booking.release_time %} {{ ((booking.release_time -
+                    booking.booking_time).total_seconds() / 3600) | round(1) }}h
+                    {% else %} Ongoing {% endif %}
+                  </td>
+                  <td>
+                    {% if booking.status == 'active' %}
+                    <span class="badge bg-warning">Active</span>
+                    {% elif booking.status == 'completed' %}
+                    <span class="badge bg-success">Completed</span>
+                    {% elif booking.status == 'cancelled' %}
+                    <span class="badge bg-danger">Cancelled</span>
+                    {% endif %}
+                  </td>
+                  <td>₹{{ "%.2f"|format(booking.total_cost) }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="alert alert-info">
+            <h6>No Booking History</h6>
+            <p class="mb-0">This parking spot has no booking history yet.</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

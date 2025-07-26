@@ -1,0 +1,170 @@
+{% extends "base.html" %} {% block content %}
+
+<div class="container">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Edit Parking Lot</h2>
+    <div>
+      <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary me-2"
+        >Back to Dashboard</a
+      >
+      <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+    </div>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">
+          <h5>Edit Parking Lot: {{ lot.name }}</h5>
+        </div>
+        <div class="card-body">
+          <form
+            method="POST"
+            action="{{ url_for('edit_parking_lot', lot_id=lot.id) }}"
+          >
+            {{ form.hidden_tag() }}
+
+            <div class="mb-3">
+              {{ form.name.label(class="form-label") }} {{
+              form.name(class="form-control", placeholder="Enter parking lot
+              name") }} {% if form.name.errors %}
+              <div class="text-danger">
+                {% for error in form.name.errors %}
+                <small>{{ error }}</small>
+                {% endfor %}
+              </div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              {{ form.location.label(class="form-label") }} {{
+              form.location(class="form-control", placeholder="Enter location
+              (e.g., Mall, Airport, Downtown, etc.)") }} {% if
+              form.location.errors %}
+              <div class="text-danger">
+                {% for error in form.location.errors %}
+                <small>{{ error }}</small>
+                {% endfor %}
+              </div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              {{ form.total_spots.label(class="form-label") }} {{
+              form.total_spots(class="form-control", placeholder="Total number
+              of parking spots (1-100)") }} {% if form.total_spots.errors %}
+              <div class="text-danger">
+                {% for error in form.total_spots.errors %}
+                <small>{{ error }}</small>
+                {% endfor %}
+              </div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              {{ form.price_per_hour.label(class="form-label") }} {{
+              form.price_per_hour(class="form-control", step="0.01",
+              placeholder="Price in rupees per hour") }} {% if
+              form.price_per_hour.errors %}
+              <div class="text-danger">
+                {% for error in form.price_per_hour.errors %}
+                <small>{{ error }}</small>
+                {% endfor %}
+              </div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Current Status</label>
+              <div class="alert alert-info">
+                <strong>Available Spots:</strong> {{ lot.available_spots }}<br />
+                <strong>Occupied Spots:</strong> {{ lot.total_spots -
+                lot.available_spots }}<br />
+                <small class="text-muted"
+                  >Spots can only be removed if they are not currently
+                  occupied</small
+                >
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-between">
+              <a
+                href="{{ url_for('admin_dashboard') }}"
+                class="btn btn-secondary"
+                >Cancel</a
+              >
+              {{ form.submit(class="btn btn-primary") }}
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Information Section -->
+  <div class="row justify-content-center mt-4">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">
+          <h6>Parking Lot Information for {{ lot.name }}</h6>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-4">
+              <div class="text-center">
+                <h5 class="text-primary">{{ lot.total_spots }}</h5>
+                <small class="text-muted">Total Spots</small>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="text-center">
+                <h5 class="text-success">{{ lot.available_spots }}</h5>
+                <small class="text-muted">Available Spots</small>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="text-center">
+                <h5 class="text-danger">
+                  {{ lot.total_spots - lot.available_spots }}
+                </h5>
+                <small class="text-muted">Occupied Spots</small>
+              </div>
+            </div>
+          </div>
+          <hr />
+          </div>
+          <div class="row mt-3">
+            <div class="col-12">
+              <form
+                method="POST"
+                action="{{ url_for('delete_parking_lot', lot_id=lot.id) }}"
+                style="display: inline"
+              >
+                <button
+                  type="submit"
+                  class="btn btn-danger w-100"
+                  {%
+                  if
+                  lot.total_spots
+                  -
+                  lot.available_spots
+                >
+                  0 %} disabled title="Cannot delete parking lot while spots are
+                  occupied" {% endif %} onclick="return confirm('Delete entire
+                  parking lot \'{{ lot.name }}\'? This will delete all spots and
+                  cannot be undone. Are you sure?')" >
+                  <i class="bi bi-trash"></i> Delete Entire Parking Lot {% if
+                  lot.total_spots - lot.available_spots > 0 %} ({{
+                  lot.total_spots - lot.available_spots }} spots occupied) {%
+                  endif %}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

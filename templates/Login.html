@@ -1,0 +1,21 @@
+{% extends "base.html" %} {% block content %}
+<div class="position-absolute top-50 start-50 translate-middle">
+  {% for message in get_flashed_messages() %}
+  <div class="alert alert-danger">{{ message }}</div>
+  {% endfor %}
+  <p class="display-6">User login</p>
+  <form method="POST" action="{{ url_for('home') }}" id="loginForm">
+    {{ form.hidden_tag() }}
+    <div class="mb-3">
+      {{ form.email.label(class="form-label") }} {{
+      form.email(class="form-control", id="email") }}
+    </div>
+    <div class="mb-3">
+      {{form.password.label(class="form-label")}} {{
+      form.password(class="form-control", id="password", type="password") }}
+    </div>
+    <button type="submit" class="btn btn-primary">Login</button>
+  </form>
+  <a href="{{ url_for('signup') }}" class="text-info">Create account?</a>
+</div>
+{% endblock %}
