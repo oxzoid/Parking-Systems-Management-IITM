@@ -12,7 +12,7 @@ A web-based parking management system built with Flask for managing parking lots
 ## Table of Contents
 - [Features](#features)
 - [Technology Stack](#technology-stack)
-- [Installation](#installation)
+- [How to Run](#how-to-run)
 - [Usage](#usage)
 - [Project Structure](#project-structure)
 - [Routes](#routes)
@@ -54,7 +54,40 @@ A web-based parking management system built with Flask for managing parking lots
 ### Frontend
 - **HTML5 & CSS3** - Basic web structure
 - **Bootstrap 5.3** - CSS framework for styling
-- **Minimal JavaScript** - Bootstrap functionality only
+
+
+## How to Run
+
+1. **Activate the virtual environment** (if using one):
+   ```powershell
+   .\Scripts\activate
+   ```
+
+2. **Install required packages:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Run the application**:
+   ```powershell
+   python app.py
+   ```
+
+### Access the Application
+- Open your web browser and go to: `http://localhost:5000`
+- The application will automatically:
+  - Create the SQLite database (`instance/parking.db`)
+  - Initialize sample parking lots
+  - Create an admin user: **admin@parking.com** / **admin123**
+
+### Default Login Credentials
+- **Admin Access**: 
+  - Email: `admin@parking.com`
+  - Password: `admin123`
+- **Regular Users**: Create new accounts via the signup page
+
+### Stopping the Application
+- Press `Ctrl + C` in the terminal to stop the Flask development server
 
 ## Routes
 
